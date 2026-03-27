@@ -1,328 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TeleHealth — Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2a2d3e;--text:#e2e8f0;--muted:#8892a4;--accent:#6366f1;--accent-glow:rgba(99,102,241,0.3);--green:#10b981;--red:#ef4444;--amber:#f59e0b;--radius:12px}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-    .layout{display:flex;min-height:100vh}
-    aside{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
-    .logo-area{padding:24px 20px;border-bottom:1px solid var(--border)}
-    .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-    .logo-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white}
-    .logo-name{font-size:15px;font-weight:600;color:var(--text)}
-    .logo-sub{font-size:11px;color:var(--muted)}
-    .nav-section{padding:12px 12px 0;flex:1}
-    .nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 8px 4px}
-    .nav-btn{display:flex;align-items:center;gap:10px;width:100%;background:transparent;color:var(--muted);border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;margin-bottom:2px;transition:all 0.15s;text-align:left}
-    .nav-btn:hover{background:var(--surface2);color:var(--text)}
-    .nav-btn.active{background:rgba(99,102,241,0.15);color:var(--accent)}
-    .nav-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background 0.15s}
-    .nav-btn.active .dot{background:var(--accent)}
-    .sidebar-bottom{padding:16px;border-top:1px solid var(--border)}
-    #admin-label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px;word-break:break-all}
-    #logout-btn{width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;font-family:'Inter',sans-serif}
-    #logout-btn:hover{background:rgba(239,68,68,0.2)}
-    main{flex:1;padding:28px;overflow-y:auto}
-    .section{display:none}
-    .section.active{display:block}
-    .page-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
-    .page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-    @media(max-width:1000px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-    .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-    .stat-num{font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px}
-    .stat-label{font-size:12px;color:var(--muted)}
-    .stat.blue .stat-num{color:#60a5fa}
-    .stat.green .stat-num{color:#34d399}
-    .stat.purple .stat-num{color:#a78bfa}
-    .stat.amber .stat-num{color:#fbbf24}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px}
-    .card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media(max-width:600px){.form-row{grid-template-columns:1fr}}
-    .form-group{margin-bottom:12px}
-    .form-group label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
-    .form-group input,.form-group select{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
-    .form-group input:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-    .btn-add{background:var(--accent);color:white;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
-    .btn-add:hover{background:#4f46e5}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)}
-    td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
-    tr:last-child td{border-bottom:none}
-    tr:hover td{background:rgba(255,255,255,0.02)}
-    .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
-    .badge.scheduled{background:rgba(96,165,250,0.15);color:#60a5fa}
-    .badge.completed{background:rgba(52,211,153,0.15);color:#34d399}
-    .badge.cancelled{background:rgba(239,68,68,0.15);color:#f87171}
-    .badge.paid{background:rgba(52,211,153,0.15);color:#34d399}
-    .badge.pending{background:rgba(251,191,36,0.15);color:#fbbf24}
-    .badge.refunded{background:rgba(239,68,68,0.15);color:#f87171}
-    .badge.patient{background:rgba(96,165,250,0.15);color:#60a5fa}
-    .badge.admin{background:rgba(167,139,250,0.15);color:#a78bfa}
-    .badge.available{background:rgba(52,211,153,0.15);color:#34d399}
-    .badge.unavailable{background:rgba(239,68,68,0.15);color:#f87171}
-    .btn-sm{padding:4px 10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-weight:500;font-family:'Inter',sans-serif;margin-right:4px}
-    .btn-del{background:rgba(239,68,68,0.12);color:#f87171}
-    .btn-del:hover{background:rgba(239,68,68,0.25)}
-    .btn-warn{background:rgba(251,191,36,0.12);color:#fbbf24}
-    .btn-warn:hover{background:rgba(251,191,36,0.25)}
-    .inline-sel{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:3px 6px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif}
-    .msg{padding:10px 14px;border-radius:8px;margin-top:12px;font-size:13px;font-weight:500}
-    .msg.success{background:rgba(52,211,153,0.1);color:#34d399}
-    .msg.error{background:rgba(239,68,68,0.1);color:#f87171}
-    .empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
-    .quick-btns{display:flex;gap:10px;flex-wrap:wrap}
-    .quick-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
-    .quick-btn:hover{border-color:var(--accent);color:var(--accent)}
-    #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
-    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:360px}
-    .login-box h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
-    .login-box p{font-size:13px;color:var(--muted);margin-bottom:24px}
-    .login-btn{width:100%;background:var(--accent);color:white;border:none;padding:11px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:4px}
-    .login-btn:hover{background:#4f46e5}
-    @media(max-width:768px){
-      .layout{flex-direction:column}
-      aside{width:100%;min-height:auto;height:auto;position:relative}
-      .nav-section{display:flex;flex-wrap:wrap;gap:4px;padding:8px}
-      .nav-label{display:none}
-      .nav-btn{width:auto;padding:7px 12px;font-size:12px}
-      .stats-grid{grid-template-columns:1fr 1fr}
-      main{padding:16px}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleClinic - Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #2c3e50; margin: 0; padding: 20px; color: white;}
+        .container { max-width: 900px; margin: 0 auto; background: #ecf0f1; padding: 20px; border-radius: 8px; color: #333;}
+        h1, h2 { color: #2980b9; }
+        .form-group { margin-bottom: 15px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; }
+        button { background-color: #27ae60; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px;}
+        button:hover { background-color: #2ecc71; }
+        .btn-delete { background-color: #c0392b; }
+        .btn-edit { background-color: #f39c12; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #bdc3c7; text-align: left; }
+        th { background-color: #2980b9; color: white; }
+    </style>
 </head>
 <body>
-<div id="login-overlay">
-  <div class="login-box">
-    <h2>Admin Login</h2>
-    <p>Enter your credentials to access the dashboard.</p>
-    <div class="form-group"><label>Email</label><input id="adm-email" type="email" placeholder="admin@telehealth.com"/></div>
-    <div class="form-group"><label>Password</label><input id="adm-pass" type="password"/></div>
-    <button class="login-btn" onclick="adminLogin()">Login</button>
-    <div id="adm-msg"></div>
-  </div>
+
+<div class="container">
+    <h1>Admin Dashboard ⚙️</h1>
+    <p><strong>Note:</strong> All actions are secured by Token Authentication.</p>
+
+    <h2>Add New Service (POST)</h2>
+    <div class="form-group">
+        <input type="text" id="s_name" placeholder="Service Name (e.g., Eye Test)">
+        <input type="text" id="s_desc" placeholder="Description">
+        <input type="number" id="s_price" placeholder="Price (RM)">
+        <br><br>
+        <button onclick="addService()">Add Service</button>
+    </div>
+
+    <h2>Manage Services (PUT & DELETE)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Service Name</th>
+                <th>Price (RM)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="admin-table">
+            <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
+    </table>
 </div>
-<div class="layout">
-  <aside>
-    <div class="logo-area">
-      <div class="logo-row">
-        <div class="logo-icon">T</div>
-        <span class="logo-name">TeleHealth</span>
-      </div>
-      <div class="logo-sub">Admin Dashboard</div>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Main</div>
-      <button class="nav-btn active" onclick="showSection('overview',this)"><span class="dot"></span>Overview</button>
-      <button class="nav-btn" onclick="showSection('patients',this)"><span class="dot"></span>Patients</button>
-      <button class="nav-btn" onclick="showSection('doctors',this)"><span class="dot"></span>Doctors</button>
-      <button class="nav-btn" onclick="showSection('appointments',this)"><span class="dot"></span>Appointments</button>
-      <button class="nav-btn" onclick="showSection('payments',this)"><span class="dot"></span>Payments</button>
-    </div>
-    <div class="sidebar-bottom">
-      <span id="admin-label">Not logged in</span>
-      <button id="logout-btn" onclick="logout()">Sign out</button>
-    </div>
-  </aside>
-  <main>
-    <div id="overview" class="section active">
-      <div class="page-title">Overview</div>
-      <div class="page-sub">System summary at a glance.</div>
-      <div class="stats-grid">
-        <div class="stat blue"><div class="stat-num" id="stat-patients">—</div><div class="stat-label">Total Patients</div></div>
-        <div class="stat green"><div class="stat-num" id="stat-doctors">—</div><div class="stat-label">Total Doctors</div></div>
-        <div class="stat purple"><div class="stat-num" id="stat-appointments">—</div><div class="stat-label">Appointments</div></div>
-        <div class="stat amber"><div class="stat-num" id="stat-payments">—</div><div class="stat-label">Payments</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Quick actions</div>
-        <div class="quick-btns">
-          <button class="quick-btn" onclick="showSection('doctors',null);loadDoctors()">Manage Doctors</button>
-          <button class="quick-btn" onclick="showSection('appointments',null);loadAppointments()">View Appointments</button>
-          <button class="quick-btn" onclick="showSection('payments',null);loadPayments()">View Payments</button>
-        </div>
-      </div>
-    </div>
-    <div id="patients" class="section">
-      <div class="page-title">Patients</div>
-      <div class="page-sub">All registered patient accounts.</div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Registered</th><th>Action</th></tr></thead>
-            <tbody id="patients-table"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id="doctors" class="section">
-      <div class="page-title">Doctors</div>
-      <div class="page-sub">Manage the medical team.</div>
-      <div class="card">
-        <div class="card-title">Add New Doctor</div>
-        <div class="form-row">
-          <div class="form-group"><label>Full name</label><input id="doc-name" type="text" placeholder="Dr. Sarah Lim"/></div>
-          <div class="form-group"><label>Specialty</label><input id="doc-spec" type="text" placeholder="General Practice"/></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Email</label><input id="doc-email" type="email" placeholder="sarah@clinic.com"/></div>
-          <div class="form-group"><label>Phone</label><input id="doc-phone" type="text" placeholder="0123000001"/></div>
-        </div>
-        <button class="btn-add" onclick="addDoctor()">Add Doctor</button>
-        <div id="doc-msg"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">All Doctors</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Name</th><th>Specialty</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="doctors-table"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id="appointments" class="section">
-      <div class="page-title">Appointments</div>
-      <div class="page-sub">View and manage all appointments.</div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Specialty</th><th>Date and Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="appointments-table"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id="payments" class="section">
-      <div class="page-title">Payments</div>
-      <div class="page-sub">All payment records in the system.</div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Appt Date</th><th>Amount (RM)</th><th>Status</th><th>Method</th><th>Paid At</th></tr></thead>
-            <tbody id="payments-table"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
+
 <script>
-  const API='http://localhost/telehealth-api';
-  let token=localStorage.getItem('adm-token')||null;
-  if(token){document.getElementById('login-overlay').style.display='none';document.getElementById('admin-label').textContent=localStorage.getItem('adm-name')||'Admin';loadOverview();}
-  function showSection(id,btn){
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if(btn)btn.classList.add('active');
-    if(id==='overview')loadOverview();
-    if(id==='patients')loadPatients();
-    if(id==='doctors')loadDoctors();
-    if(id==='appointments')loadAppointments();
-    if(id==='payments')loadPayments();
-  }
-  function showMsg(id,text,type){const el=document.getElementById(id);el.className='msg '+type;el.textContent=text;}
-  function authH(){return{Authorization:`Bearer ${token}`,'Content-Type':'application/json'};}
-  async function adminLogin() {
-  const email    = document.getElementById('adm-email').value;
-  const pass     = document.getElementById('adm-pass').value;
+    // The API key we inserted in Part 1 Database script
+    const API_KEY = "admin_key_999"; 
 
-  if (!email || !pass) {
-    showMsg('adm-msg', 'Please enter email and password.', 'error');
-    return;
-  }
-
-  try {
-    const res  = await fetch(`${API}/users/login`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: email, password: pass })
-    });
-
-    const text = await res.text();
-    console.log('Raw response:', text);
-
-    const data = JSON.parse(text);
-
-    if (res.ok && data.token) {
-      token = data.token;
-      localStorage.setItem('adm-token', token);
-      localStorage.setItem('adm-name', email.split('@')[0]);
-      document.getElementById('admin-label').textContent = email.split('@')[0];
-      document.getElementById('login-overlay').style.display = 'none';
-      loadOverview();
-    } else {
-      showMsg('adm-msg', data.error || 'Login failed.', 'error');
+    // Function to load data
+    function loadServices() {
+        fetch("http://localhost/teleclinic/api/services/getServices.php")
+            .then(res => res.json())
+            .then(data => {
+                let html = "";
+                data.data.forEach(s => {
+                    html += `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td>${s.service_name}</td>
+                            <td>RM ${s.price}</td>
+                            <td>
+                                <button class="btn-edit" onclick="updateService(${s.id})">Update Price</button>
+                                <button class="btn-delete" onclick="deleteService(${s.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById("admin-table").innerHTML = html;
+            });
     }
-  } catch (err) {
-    showMsg('adm-msg', 'Error: ' + err.message, 'error');
-    console.error('Login error:', err);
-  }
-}
-  
-  function logout(){token=null;localStorage.removeItem('adm-token');localStorage.removeItem('adm-name');location.reload();}
-  async function loadOverview(){
-    const [u,d,a,p]=await Promise.all([
-      fetch(`${API}/users`,{headers:authH()}).then(r=>r.json()),
-      fetch(`${API}/doctors`).then(r=>r.json()),
-      fetch(`${API}/appointments`,{headers:authH()}).then(r=>r.json()),
-      fetch(`${API}/payments`,{headers:authH()}).then(r=>r.json()),
-    ]);
-    document.getElementById('stat-patients').textContent=Array.isArray(u)?u.length:'—';
-    document.getElementById('stat-doctors').textContent=Array.isArray(d)?d.length:'—';
-    document.getElementById('stat-appointments').textContent=Array.isArray(a)?a.length:'—';
-    document.getElementById('stat-payments').textContent=Array.isArray(p)?p.length:'—';
-  }
-  async function loadPatients(){
-    const res=await fetch(`${API}/users`,{headers:authH()});const data=await res.json();
-    document.getElementById('patients-table').innerHTML=Array.isArray(data)&&data.length?data.map(u=>`<tr><td>${u.user_id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.phone||'—'}</td><td><span class="badge ${u.role}">${u.role}</span></td><td>${new Date(u.created_at).toLocaleDateString()}</td><td><button class="btn-sm btn-del" onclick="deletePatient(${u.user_id})">Delete</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No patients found.</td></tr>';
-  }
-  async function deletePatient(id){
-    if(!confirm('Delete this patient? This removes all their data.'))return;
-    await fetch(`${API}/users/${id}`,{method:'DELETE',headers:authH()});loadPatients();loadOverview();
-  }
-  async function loadDoctors(){
-    const res=await fetch(`${API}/doctors`);const data=await res.json();
-    document.getElementById('doctors-table').innerHTML=Array.isArray(data)&&data.length?data.map(d=>`<tr><td>${d.doctor_id}</td><td>${d.name}</td><td>${d.specialty}</td><td>${d.email}</td><td>${d.phone||'—'}</td><td><span class="badge ${d.available==1?'available':'unavailable'}">${d.available==1?'Available':'Unavailable'}</span></td><td><button class="btn-sm btn-warn" onclick="toggleAvail(${d.doctor_id},${d.available},'${d.name}','${d.specialty}','${d.phone||''}')">${d.available==1?'Set Unavailable':'Set Available'}</button><button class="btn-sm btn-del" onclick="deleteDoctor(${d.doctor_id})">Delete</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No doctors found.</td></tr>';
-  }
-  async function addDoctor(){
-    const body={name:document.getElementById('doc-name').value,specialty:document.getElementById('doc-spec').value,email:document.getElementById('doc-email').value,phone:document.getElementById('doc-phone').value};
-    const res=await fetch(`${API}/doctors`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
-    const data=await res.json();showMsg('doc-msg',data.message||data.error,res.ok?'success':'error');
-    if(res.ok){loadDoctors();loadOverview();['doc-name','doc-spec','doc-email','doc-phone'].forEach(id=>document.getElementById(id).value='');}
-  }
-  async function toggleAvail(id,current,name,specialty,phone){
-    const newVal=current==1?0:1;
-    await fetch(`${API}/doctors/${id}`,{method:'PUT',headers:authH(),body:JSON.stringify({name,specialty,phone,available:newVal})});loadDoctors();
-  }
-  async function deleteDoctor(id){
-    if(!confirm('Delete this doctor?'))return;
-    await fetch(`${API}/doctors/${id}`,{method:'DELETE',headers:authH()});loadDoctors();loadOverview();
-  }
-  async function loadAppointments(){
-    const res=await fetch(`${API}/appointments`,{headers:authH()});const data=await res.json();
-    document.getElementById('appointments-table').innerHTML=Array.isArray(data)&&data.length?data.map(a=>`<tr><td>${a.appointment_id}</td><td>${a.patient_name}</td><td>${a.doctor_name}</td><td>${a.specialty}</td><td>${new Date(a.appt_date).toLocaleString()}</td><td>${a.reason||'—'}</td><td><span class="badge ${a.status}">${a.status}</span></td><td><select class="inline-sel" onchange="updateApptStatus(${a.appointment_id},this.value)"><option value="">Update</option><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><button class="btn-sm btn-del" onclick="deleteAppt(${a.appointment_id})">Delete</button></td></tr>`).join(''):'<tr><td colspan="8" class="empty">No appointments found.</td></tr>';
-  }
-  async function updateApptStatus(id,status){
-    if(!status)return;
-    await fetch(`${API}/appointments/${id}`,{method:'PUT',headers:authH(),body:JSON.stringify({status})});loadAppointments();
-  }
-  async function deleteAppt(id){
-    if(!confirm('Delete this appointment?'))return;
-    await fetch(`${API}/appointments/${id}`,{method:'DELETE',headers:authH()});loadAppointments();loadOverview();
-  }
-  async function loadPayments(){
-    const res=await fetch(`${API}/payments`,{headers:authH()});const data=await res.json();
-    document.getElementById('payments-table').innerHTML=Array.isArray(data)&&data.length?data.map(p=>`<tr><td>${p.payment_id}</td><td>${p.patient_name}</td><td>${p.doctor_name}</td><td>${new Date(p.appt_date).toLocaleDateString()}</td><td>RM ${parseFloat(p.amount).toFixed(2)}</td><td><span class="badge ${p.payment_status}">${p.payment_status}</span></td><td>${p.method}</td><td>${new Date(p.paid_at).toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">No payments found.</td></tr>';
-  }
+
+    // Function to Add Service (POST)
+    function addService() {
+        const data = {
+            service_name: document.getElementById("s_name").value,
+            description: document.getElementById("s_desc").value,
+            price: document.getElementById("s_price").value
+        };
+
+        fetch("http://localhost/teleclinic/api/services/addService.php", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${API_KEY}` // Passing API KEY!
+            },
+            body: JSON.stringify(data)
+        }).then(res => res.json()).then(res => {
+            alert(res.message);
+            loadServices(); // Reload table
+        });
+    }
+
+    // Function to Update Price (PUT)
+    function updateService(id) {
+        let newPrice = prompt("Enter new price for Service ID: " + id);
+        if(newPrice) {
+            fetch("http://localhost/teleclinic/api/services/updateService.php", {
+                method: "PUT",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({ id: id, price: newPrice })
+            }).then(res => res.json()).then(res => {
+                alert(res.message);
+                loadServices();
+            });
+        }
+    }
+
+    // Function to Delete Service (DELETE)
+    function deleteService(id) {
+        if(confirm("Are you sure you want to delete Service ID: " + id + "?")) {
+            fetch("http://localhost/teleclinic/api/services/deleteService.php", {
+                method: "DELETE",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({ id: id })
+            }).then(res => res.json()).then(res => {
+                alert(res.message);
+                loadServices();
+            });
+        }
+    }
+
+    // Load initial data
+    loadServices();
 </script>
+
 </body>
 </html>
