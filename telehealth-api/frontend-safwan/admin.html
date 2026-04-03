@@ -3,139 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeleClinic - Admin Dashboard</title>
+    <title>TeleHealth | Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #2c3e50; margin: 0; padding: 20px; color: white;}
-        .container { max-width: 900px; margin: 0 auto; background: #ecf0f1; padding: 20px; border-radius: 8px; color: #333;}
-        h1, h2 { color: #2980b9; }
-        .form-group { margin-bottom: 15px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; }
-        button { background-color: #27ae60; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px;}
-        button:hover { background-color: #2ecc71; }
-        .btn-delete { background-color: #c0392b; }
-        .btn-edit { background-color: #f39c12; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #bdc3c7; text-align: left; }
-        th { background-color: #2980b9; color: white; }
+        :root { --bg: #f8fafc; --sidebar: #ffffff; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --accent: #0ea5e9; --success: #10b981; --danger: #ef4444; }
+        body.dark-mode { --bg: #0b0e14; --sidebar: #12161f; --surface: #1a1d27; --border: #232936; --text: #ffffff; --muted: #94a3b8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: 0.3s; }
+        
+        input[type="datetime-local"] { color-scheme: light; }
+        body.dark-mode input[type="datetime-local"] { color-scheme: dark; }
+
+        #login-overlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-box { background: #111827; border: 1px solid #1f2937; border-radius: 20px; padding: 40px; width: 400px; text-align: center; color: white; }
+        .login-box input { width: 100%; padding: 12px; background: #0b0f1a; border: 1px solid #1f2937; color: white; border-radius: 8px; margin: 10px 0; outline: none; }
+
+        aside { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        main { flex: 1; padding: 25px 40px; overflow-y: auto; }
+        .brand { padding: 25px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+        .brand i { background: var(--accent); color: white; padding: 7px; border-radius: 8px; font-size: 14px; }
+        
+        .nav-links { list-style: none; padding: 20px 12px; flex: 1; }
+        .nav-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: transparent; border: none; color: var(--muted); border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; margin-bottom: 4px; transition: 0.2s; text-align: left;}
+        .nav-btn.active { color: var(--accent); background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2); }
+        
+        .sign-out { color: var(--danger); padding: 20px; border-top: 1px solid var(--border); background: none; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; width: 100%; margin-top: auto; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .stat-card small { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .stat-card h2 { font-size: 28px; margin-top: 4px; }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
+        input, select { background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: var(--text); flex: 1; outline: none; }
+        .btn-blue { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th { text-align: left; padding: 10px; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; }
+        td { padding: 15px 10px; border-bottom: 1px solid var(--border); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(14, 165, 233, 0.1); color: var(--accent); }
+        .btn-del { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 14px;}
+
+        .section { display: none; }
+        .section.active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Admin Dashboard ⚙️</h1>
-    <p><strong>Note:</strong> All actions are secured by Token Authentication.</p>
-
-    <h2>Add New Service (POST)</h2>
-    <div class="form-group">
-        <input type="text" id="s_name" placeholder="Service Name (e.g., Eye Test)">
-        <input type="text" id="s_desc" placeholder="Description">
-        <input type="number" id="s_price" placeholder="Price (RM)">
-        <br><br>
-        <button onclick="addService()">Add Service</button>
+<div id="login-overlay">
+    <div class="login-box">
+        <div style="background: var(--accent); width: 40px; height: 40px; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-lock"></i></div>
+        <h2 style="margin: 15px 0 25px;">Admin Portal</h2>
+        <div style="text-align: left;">
+            <label style="font-size: 11px; color: #9ca3af; font-weight: bold;">ADMIN EMAIL</label>
+            <input id="adm-email" value="admin@telehealth.com">
+            <label style="font-size: 11px; color: #9ca3af; font-weight: bold;">PASSWORD</label>
+            <input id="adm-pass" type="password" placeholder="Type your password">
+        </div>
+        <button class="btn-blue" style="width: 100%; margin-top: 15px;" onclick="adminLogin()">Secure Login</button>
     </div>
-
-    <h2>Manage Services (PUT & DELETE)</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Service Name</th>
-                <th>Price (RM)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="admin-table">
-            <tr><td colspan="4">Loading...</td></tr>
-        </tbody>
-    </table>
 </div>
 
-<script>
-    // The API key we inserted in Part 1 Database script
-    const API_KEY = "admin_key_999"; 
+<aside>
+    <div class="brand"><i class="fa-solid fa-house-medical"></i><div><h3>TeleHealth</h3><span style="font-size: 11px; color: var(--muted);">Admin Portal</span></div></div>
+    <ul class="nav-links">
+        <li><button class="nav-btn active" onclick="showTab('overview', this)"><i class="fa-solid fa-chart-pie"></i> Overview</button></li>
+        <li><button class="nav-btn" onclick="showTab('patients', this)"><i class="fa-solid fa-user-group"></i> Patients</button></li>
+        <li><button class="nav-btn" onclick="showTab('doctors', this)"><i class="fa-solid fa-user-doctor"></i> Doctors</button></li>
+        <li><button class="nav-btn" onclick="showTab('appointments', this)"><i class="fa-solid fa-calendar-check"></i> Appointments</button></li>
+        <li><button class="nav-btn" onclick="showTab('payments', this)"><i class="fa-solid fa-credit-card"></i> Payments</button></li>
+    </ul>
+    <button class="sign-out" onclick="logout()"><i class="fa-solid fa-power-off"></i> Sign Out</button>
+</aside>
 
-    // Function to load data
-    function loadServices() {
-        fetch("http://localhost/teleclinic/api/services/getServices.php")
-            .then(res => res.json())
-            .then(data => {
-                let html = "";
-                data.data.forEach(s => {
-                    html += `
-                        <tr>
-                            <td>${s.id}</td>
-                            <td>${s.service_name}</td>
-                            <td>RM ${s.price}</td>
-                            <td>
-                                <button class="btn-edit" onclick="updateService(${s.id})">Update Price</button>
-                                <button class="btn-delete" onclick="deleteService(${s.id})">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                document.getElementById("admin-table").innerHTML = html;
-            });
+<main>
+    <div class="header">
+        <h1 id="tab-title">Overview</h1>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <div style="background:var(--surface); border:1px solid var(--border); padding:6px 15px; border-radius:20px; font-size:13px;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> <span id="temp">27°C</span></div>
+            <button class="btn-blue" style="padding: 6px 12px; font-size: 11px;" onclick="document.body.classList.toggle('dark-mode')">🌓 Toggle Mode</button>
+        </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="overview" class="section active">
+        <div class="stats">
+            <div class="stat-card"><small>Patients</small><h2 id="st-p">0</h2></div>
+            <div class="stat-card"><small>Doctors</small><h2 id="st-d">0</h2></div>
+            <div class="stat-card"><small>Appts</small><h2 id="st-a">0</h2></div>
+            <div class="stat-card"><small>Income</small><h2>RM <span id="st-i" style="color: var(--success);">0.00</span></h2></div>
+        </div>
+        <div class="card"><canvas id="adminChart" height="100"></canvas></div>
+    </div>
+
+    <!-- PATIENTS -->
+    <div id="patients" class="section">
+        <div class="card">
+            <h4 style="margin-bottom: 15px;">Register New Patient</h4>
+            <div class="form-row">
+                <input id="p-name" placeholder="Full Name">
+                <input id="p-email" type="email" placeholder="Email Address">
+                <input id="p-phone" placeholder="Phone (e.g., 012345678)">
+                <button class="btn-blue" onclick="addPatient()">Register</button>
+            </div>
+        </div>
+        <div class="card"><table><thead><tr><th>ID</th><th>NAME</th><th>EMAIL</th><th>PHONE</th><th>ACTION</th></tr></thead><tbody id="p-list"></tbody></table></div>
+    </div>
+
+    <!-- DOCTORS -->
+    <div id="doctors" class="section">
+        <div class="card">
+            <h4 style="margin-bottom: 15px;">Add Specialist</h4>
+            <div class="form-row">
+                <input id="d-name" placeholder="Name">
+                <input id="d-spec" placeholder="Specialty">
+                <input id="d-email" type="email" placeholder="Email Address">
+                <button class="btn-blue" onclick="addDoctor()">Add Doctor</button>
+            </div>
+        </div>
+        <div class="card"><table><thead><tr><th>DOCTOR</th><th>SPECIALTY</th><th>EMAIL</th><th>ACTION</th></tr></thead><tbody id="d-list"></tbody></table></div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div id="appointments" class="section">
+        <div class="card">
+            <h4 style="margin-bottom: 15px;">Book Appointment</h4>
+            <div class="form-row">
+                <select id="sel-p"><option value="">Select Patient</option></select>
+                <select id="sel-d"><option value="">Select Doctor</option></select>
+                <input id="a-date" type="datetime-local">
+                <button class="btn-blue" onclick="bookAppt()">Book Now</button>
+            </div>
+        </div>
+        <div class="card"><table><thead><tr><th>DATE</th><th>PATIENT</th><th>DOCTOR</th><th>ACTION</th></tr></thead><tbody id="a-list"></tbody></table></div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div id="payments" class="section">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+                <h3>Payments</h3> 
+                <button class="btn-blue" style="font-size:10px;" onclick="exportCSV()">EXPORT CSV</button>
+            </div>
+            <div class="form-row">
+                <select id="sel-appt"><option value="">Select Consult ID...</option></select>
+                <input id="pay-amt" type="number" step="0.01" placeholder="Amount RM">
+                
+                <!-- FIX: Changed values to UPPERCASE to match database ENUM requirements -->
+                <select id="pay-status">
+                    <option value="PAID">Paid</option>
+                    <option value="PENDING">Pending</option>
+                </select>
+                
+                <button class="btn-blue" style="background:var(--success);" onclick="recordPay()">Save / Update</button>
+            </div>
+        </div>
+        <div class="card"><table><thead><tr><th>ID</th><th>PATIENT</th><th>AMOUNT</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="pay-list"></tbody></table></div>
+    </div>
+</main>
+
+<script>
+    const API = "http://localhost/telehealth-api";
+    let token = localStorage.getItem('token') || null;
+
+    if(token) { document.getElementById('login-overlay').style.display='none'; initDashboard(); }
+
+    function showTab(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        document.getElementById('tab-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+        
+        if(id==='patients') loadPatients();
+        if(id==='doctors') loadDoctors();
+        if(id==='appointments') { loadAppts(); populateDrop(); }
+        if(id==='payments') { loadPayments(); populateDrop(); }
     }
 
-    // Function to Add Service (POST)
-    function addService() {
-        const data = {
-            service_name: document.getElementById("s_name").value,
-            description: document.getElementById("s_desc").value,
-            price: document.getElementById("s_price").value
+    // --- STANDARD API FETCHER ---
+    async function apiRequest(path, method = 'GET', body = null) {
+        const opts = { 
+            method, 
+            headers: { 
+                'Authorization': `Bearer ${token}`, 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            } 
+        };
+        if(body) opts.body = JSON.stringify(body);
+        
+        try {
+            const res = await fetch(`${API}/${path}`, opts);
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } 
+            catch (err) { 
+                console.error("PHP Error:", text); 
+                return null; 
+            }
+
+            if (!res.ok || data.error) {
+                alert("Error: " + (data.error || data.message || "Failed to process request"));
+                return null;
+            }
+            return data.data || data;
+        } catch (e) {
+            alert("Network error.");
+            return null; 
+        }
+    }
+
+    // --- PATIENTS ---
+    async function loadPatients() {
+        const data = await apiRequest('users');
+        if(data) document.getElementById('p-list').innerHTML = data.map(p => `<tr><td>#${p.user_id || p.id}</td><td>${p.name}</td><td>${p.email}</td><td>${p.phone||'—'}</td><td><button class="btn-del" onclick="del('users', ${p.user_id || p.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+    }
+    
+    async function addPatient() {
+        const payload = { 
+            name: document.getElementById('p-name').value, 
+            email: document.getElementById('p-email').value, 
+            phone: document.getElementById('p-phone').value,
+            password: 'password123', role: 'patient' 
+        };
+        if(!payload.name || !payload.email) return alert("Name and Email required.");
+
+        let res = await apiRequest('users/register', 'POST', payload);
+        if(!res) res = await apiRequest('users', 'POST', payload); 
+
+        if(res) {
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-email').value = '';
+            document.getElementById('p-phone').value = '';
+            alert("Patient Registered Successfully!");
+            loadPatients();
+            initDashboard();
+        }
+    }
+
+    // --- DOCTORS ---
+    async function loadDoctors() {
+        const data = await apiRequest('doctors');
+        if(data) document.getElementById('d-list').innerHTML = data.map(d => `<tr><td>Dr. ${d.name}</td><td>${d.specialty}</td><td>${d.email}</td><td><button class="btn-del" onclick="del('doctors', ${d.doctor_id || d.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+    }
+    
+    async function addDoctor() {
+        const payload = { 
+            name: document.getElementById('d-name').value, 
+            specialty: document.getElementById('d-spec').value, 
+            email: document.getElementById('d-email').value 
+        };
+        
+        if(await apiRequest('doctors', 'POST', payload)) {
+            document.getElementById('d-name').value = '';
+            document.getElementById('d-spec').value = '';
+            document.getElementById('d-email').value = '';
+            alert("Doctor Added Successfully!");
+            loadDoctors();
+            initDashboard();
+        }
+    }
+
+    // --- APPOINTMENTS ---
+    async function loadAppts() {
+        const data = await apiRequest('appointments');
+        if(data) document.getElementById('a-list').innerHTML = data.map(a => `<tr><td>${new Date(a.appt_date).toLocaleString()}</td><td>${a.patient_name}</td><td>Dr. ${a.doctor_name}</td><td><button class="btn-del" onclick="del('appointments', ${a.appointment_id || a.id})"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+    }
+    
+    async function bookAppt() {
+        const rawDate = document.getElementById('a-date').value;
+        if(!document.getElementById('sel-p').value || !document.getElementById('sel-d').value || !rawDate) return alert("Select all fields.");
+
+        const payload = { 
+            user_id: parseInt(document.getElementById('sel-p').value), 
+            doctor_id: parseInt(document.getElementById('sel-d').value), 
+            appt_date: rawDate.replace('T', ' ') + ':00', 
+            reason: 'Consultation', status: 'scheduled' 
+        };
+        
+        if(await apiRequest('appointments', 'POST', payload)) {
+            document.getElementById('a-date').value = '';
+            alert("Appointment Booked Successfully!");
+            loadAppts();
+            initDashboard();
+        }
+    }
+
+    // --- PAYMENTS (WITH SMART UPDATE/UPSERT LOGIC & DELETE BUTTON) ---
+    async function loadPayments() {
+        const data = await apiRequest('payments');
+        if(data) document.getElementById('pay-list').innerHTML = data.map(p => {
+            // Guarantee string formatting before toUpperCase
+            let rawStat = p.status || p.payment_status || p.paymentStatus || 'PAID';
+            let stat = String(rawStat).toUpperCase();
+            let color = stat === 'PENDING' ? 'color:#f59e0b;' : ''; 
+            return `<tr>
+                <td>#${p.payment_id || p.id}</td>
+                <td>${p.patient_name}</td>
+                <td>RM ${parseFloat(p.amount).toFixed(2)}</td>
+                <td><span class="badge" style="${color}">${stat}</span></td>
+                <td><button class="btn-del" onclick="del('payments', ${p.payment_id || p.id})"><i class="fa-solid fa-trash-can"></i></button></td>
+            </tr>`;
+        }).join('');
+    }
+    
+    async function recordPay() {
+        const apptId = parseInt(document.getElementById('sel-appt').value);
+        const amt = document.getElementById('pay-amt').value;
+        const stat = document.getElementById('pay-status').value; // Now grabs "PENDING" or "PAID"
+        
+        if(!apptId || !amt) return alert("Enter Amount and Select ID.");
+
+        // Added multiple formatting options so your specific backend catches it perfectly
+        const payload = { 
+            appointment_id: apptId, 
+            amount: parseFloat(amt), 
+            payment_status: stat,
+            status: stat, 
+            paymentStatus: stat,
+            payment_method: 'Online',
+            method: 'Online'
         };
 
-        fetch("http://localhost/teleclinic/api/services/addService.php", {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${API_KEY}` // Passing API KEY!
-            },
-            body: JSON.stringify(data)
-        }).then(res => res.json()).then(res => {
-            alert(res.message);
-            loadServices(); // Reload table
+        // SMART LOGIC: Fetch current payments to see if this appointment already has one.
+        const existingPayments = await apiRequest('payments');
+        const duplicate = existingPayments.find(p => p.appointment_id == apptId || p.appt_id == apptId);
+
+        let success = false;
+        if (duplicate) {
+            // If it exists, UPDATE it using PUT 
+            const payId = duplicate.payment_id || duplicate.id;
+            success = await apiRequest(`payments/${payId}`, 'PUT', payload);
+            if(success) alert("Payment Updated Successfully!");
+        } else {
+            // If it's new, CREATE it using POST
+            success = await apiRequest('payments', 'POST', payload);
+            if(success) alert("Payment Recorded Successfully!");
+        }
+
+        if(success) {
+            document.getElementById('pay-amt').value = '';
+            loadPayments();
+            initDashboard();
+        }
+    }
+
+    // --- CSV EXPORT ---
+    async function exportCSV() {
+        const data = await apiRequest('payments');
+        if (!data || data.length === 0) return alert("No payment data to export!");
+
+        let csv = "Payment ID,Patient Name,Amount (RM),Status\n";
+        data.forEach(row => {
+            let id = row.payment_id || row.id;
+            let stat = (row.status || row.payment_status || 'Paid').toUpperCase();
+            csv += `#${id},${row.patient_name},${parseFloat(row.amount).toFixed(2)},${stat}\n`;
         });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = 'telehealth_payments.csv';
+        a.click();
     }
 
-    // Function to Update Price (PUT)
-    function updateService(id) {
-        let newPrice = prompt("Enter new price for Service ID: " + id);
-        if(newPrice) {
-            fetch("http://localhost/teleclinic/api/services/updateService.php", {
-                method: "PUT",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${API_KEY}`
-                },
-                body: JSON.stringify({ id: id, price: newPrice })
-            }).then(res => res.json()).then(res => {
-                alert(res.message);
-                loadServices();
-            });
+    // --- UTILS ---
+    async function populateDrop() {
+        const [p, d, a] = await Promise.all([apiRequest('users'), apiRequest('doctors'), apiRequest('appointments')]);
+        if(p) document.getElementById('sel-p').innerHTML = '<option value="">-- Select Patient --</option>' + p.map(x=>`<option value="${x.user_id || x.id}">${x.name}</option>`).join('');
+        if(d) document.getElementById('sel-d').innerHTML = '<option value="">-- Select Doctor --</option>' + d.map(x=>`<option value="${x.doctor_id || x.id}">Dr. ${x.name}</option>`).join('');
+        const paySel = document.getElementById('sel-appt');
+        if(paySel && a) paySel.innerHTML = '<option value="">-- Select Consult ID --</option>' + a.map(x=>`<option value="${x.appointment_id || x.id}">#${x.appointment_id || x.id} - ${x.patient_name}</option>`).join('');
+    }
+
+    async function del(route, id) {
+        if(confirm("Are you sure you want to delete?")) {
+            await apiRequest(`${route}/${id}`, 'DELETE');
+            location.reload();
         }
     }
 
-    // Function to Delete Service (DELETE)
-    function deleteService(id) {
-        if(confirm("Are you sure you want to delete Service ID: " + id + "?")) {
-            fetch("http://localhost/teleclinic/api/services/deleteService.php", {
-                method: "DELETE",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${API_KEY}`
-                },
-                body: JSON.stringify({ id: id })
-            }).then(res => res.json()).then(res => {
-                alert(res.message);
-                loadServices();
-            });
-        }
+    async function adminLogin() {
+        const email = document.getElementById('adm-email').value;
+        const password = document.getElementById('adm-pass').value;
+        try {
+            const res = await fetch(`${API}/users/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password}) });
+            const d = await res.json();
+            if(d.token) { localStorage.setItem('token', d.token); location.reload(); } else { alert(d.error || "Login Failed"); }
+        } catch (e) { alert("Error connecting to login server."); }
     }
 
-    // Load initial data
-    loadServices();
+    function logout() { localStorage.clear(); location.reload(); }
+
+    async function initDashboard() {
+        const [u, d, a, p] = await Promise.all([apiRequest('users'), apiRequest('doctors'), apiRequest('appointments'), apiRequest('payments')]);
+        if(u) document.getElementById('st-p').innerText = u.length; 
+        if(d) document.getElementById('st-d').innerText = d.length; 
+        if(a) document.getElementById('st-a').innerText = a.length;
+        if(p) {
+            let inc = p.reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+            document.getElementById('st-i').innerText = inc.toFixed(2);
+        }
+        
+        let chartStatus = Chart.getChart("adminChart"); if (chartStatus) chartStatus.destroy(); 
+        const ctx = document.getElementById('adminChart').getContext('2d');
+        new Chart(ctx, { type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label:'Appts', data:[5,10,22,12,30,6,15], borderColor:'#0ea5e9', backgroundColor:'rgba(14, 165, 233, 0.1)', fill:true, tension: 0.4 }] }, options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} } });
+    }
 </script>
-
 </body>
 </html>
